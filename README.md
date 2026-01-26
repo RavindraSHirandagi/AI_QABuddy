@@ -1,6 +1,6 @@
 # 🚀 QA TestCase Buddy
 
-![QA TestCase Buddy Hero](assets/hero.png)
+![QA TestCase Buddy](assets/app_screenshot.png)
 
 ## ✨ Overview
 **QA TestCase Buddy** is a premium, AI-powered local tool designed to streamline the test case generation process. By leveraging the **Ollama `qwen3:4b`** model, it transforms raw requirements into structured, high-quality QA test cases in seconds.
