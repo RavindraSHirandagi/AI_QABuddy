@@ -130,10 +130,11 @@ When a Tool fails or an error occurs:
 
 ## 📂 File Structure Reference
 
-Plaintext
+```Plaintext
 
-`├── gemini.md          # Project Map & State Tracking
+├── gemini.md          # Project Map & State Tracking
 ├── .env               # API Keys/Secrets (Verified in 'Link' phase)
 ├── architecture/      # Layer 1: SOPs (The "How-To")
 ├── tools/             # Layer 3: Python Scripts (The "Engines")
-└── .tmp/              # Temporary Workbench (Intermediates)`
+└── .tmp/              # Temporary Workbench (Intermediates)
+```
