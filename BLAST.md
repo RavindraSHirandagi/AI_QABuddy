@@ -44,6 +44,7 @@ You are strictly forbidden from writing scripts in `tools/` until:
 ## ⚡ Phase 2: L - Link (Connectivity)
 
 **1. Verification:** Test all API connections and `.env` credentials.
+
 **2. Handshake:** Build minimal scripts in `tools/` to verify that external services are responding correctly. Do not proceed to full logic if the "Link" is broken.
 
 ---
@@ -74,7 +75,9 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 ## ✨ Phase 4: S - Stylize (Refinement & UI)
 
 **1. Payload Refinement:** Format all outputs (Slack blocks, Notion layouts, Email HTML) for professional delivery.
+
 **2. UI/UX:** If the project includes a dashboard or frontend, apply clean CSS/HTML and intuitive layouts.
+
 **3. Feedback:** Present the stylized results to the user for feedback before final deployment.
 
 ---
@@ -82,7 +85,9 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 ## 🛰️ Phase 5: T - Trigger (Deployment)
 
 **1. Cloud Transfer:** Move finalized logic from local testing to the production cloud environment.
+
 **2. Automation:** Set up execution triggers (Cron jobs, Webhooks, or Listeners).
+
 **3. Documentation:** Finalize the **Maintenance Log** in `gemini.md` for long-term stability.
 
 ---
@@ -120,7 +125,8 @@ When a Tool fails or an error occurs:
 ### 3. Deliverables vs. Intermediates
 
 - **Local (`.tmp/`):** All scraped data, logs, and temporary files. These are ephemeral and can be deleted.
-- **Global (Cloud):** The "Payload." Google Sheets, Databases, or UI updates. **A project is only "Complete" when the payload is in its final cloud destination.**
+- **Global (Cloud):** The "Payload." Google Sheets, Databases, or UI updates. 
+- **A project is only "Complete" when the payload is in its final cloud destination.**
 
 ## 📂 File Structure Reference
 

@@ -41,6 +41,31 @@ Whether you prefer a lightning-fast **CLI** or a modern, glassmorphic **Web UI**
 - **Interactive**: `python run_generator.py` (Type `DONE` when finished).
 - **One-Liner**: `python run_generator.py "User login with 2FA"`
 
+## 📂 Project Structure
+
+```text
+AITestGenerator/
+├── architecture/          # Layer 1: System SOPs & Logic Workflows
+│   └── generation_workflow.md
+├── assets/                # UI Screenshots & Media
+├── static/                # Frontend Styling (CSS)
+├── templates/             # HTML Templates (Flask)
+├── tools/                 # Layer 3: Deterministic Python Engines
+│   ├── generate_test_cases.py # AI Integration Logic
+│   ├── save_to_excel.py       # Excel Export Engine
+│   ├── handshake.py           # Connection Verification
+│   └── debug_model.py         # Model Testing Utility
+├── .tmp/                  # Temporary Workbench (Intermediate files)
+├── app.py                 # Web Application Entry Point (Flask)
+├── run_generator.py       # CLI Application Entry Point
+├── BLAST.md               # Project Protocol & Master Prompt
+├── gemini.md              # Project Constitution & State Tracking
+├── task_plan.md           # Phase Tracking & Goal Checklists
+├── progress.md            # Execution Logs & Results
+├── findings.md            # Research & Constraints
+└── README.md              # Project Documentation
+```
+
 ## 🔧 Internal Architecture
 The project follows a robust 3-layer architecture:
 - **Layer 1 (Architecture)**: Defined SOPs and logic workflows.
