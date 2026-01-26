@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.tmp/
+*.xlsx
+.venv/
+env/
+venv/
+.env
+.vscode/
+.idea/

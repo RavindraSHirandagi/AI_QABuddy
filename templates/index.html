@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA TestCase Buddy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="glass-container">
+        <header>
+            <h1>🚀 QA TestCase Buddy</h1>
+            <p>AI-Powered Local Test Case Creator</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <textarea id="promptInput"
+                    placeholder="Describe your feature (e.g., 'Login page with 2FA')..."></textarea>
+                <button id="generateBtn" onclick="generateCtx()">Generate Test Cases</button>
+            </div>
+
+            <div id="loading" class="hidden">
+                <div class="spinner"></div>
+                <p>Consulting the AI core...</p>
+            </div>
+
+            <div id="resultsSection" class="hidden">
+                <div class="results-header">
+                    <h2>Generated Cases <span id="execTime"
+                            style="font-size: 0.8rem; opacity: 0.7; margin-left: 10px;"></span></h2>
+                    <button id="downloadBtn" class="secondary-btn" onclick="downloadExcel()">Download Excel</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>Test Name</th>
+                                <th>Steps</th>
+                                <th>Expected Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentCases = [];
+
+        async function generateCtx() {
+            const prompt = document.getElementById('promptInput').value;
+            if (!prompt) return alert("Please enter a requirement.");
+
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('generateBtn').disabled = true;
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert("Error: " + data.error);
+                } else {
+                    currentCases = data.test_cases;
+                    const timeTaken = data.execution_time || 0;
+                    document.getElementById('execTime').textContent = `(${timeTaken}s)`;
+                    renderTable(currentCases);
+                }
+            } catch (e) {
+                alert("Network error: " + e);
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('generateBtn').disabled = false;
+            }
+        }
+
+        function renderTable(cases) {
+            const tbody = document.querySelector('#resultsTable tbody');
+            tbody.innerHTML = '';
+
+            cases.forEach(c => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${c.test_name || c.Test_Name || '-'}</td>
+                    <td><pre>${c.steps || c.Steps || '-'}</pre></td>
+                    <td>${c.expected_result || c.Expected_Result || '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('resultsSection').classList.remove('hidden');
+        }
+
+        async function downloadExcel() {
+            if (currentCases.length === 0) return;
+
+            const response = await fetch('/download', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ test_cases: currentCases })
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'test_cases.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } else {
+                alert("Failed to create download.");
+            }
+        }
+    </script>
+</body>
+
+</html>
