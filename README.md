@@ -1,45 +1,55 @@
-# QA TestCase Buddy (Local LLM Test Case Generator)
+# 🚀 QA TestCase Buddy
 
-## Overview
-A local CLI tool that uses Ollama (specifically `qwen3:4b`) to generate detailed QA test cases from user requirements and saves them to Excel.
+![QA TestCase Buddy Hero](assets/hero.png)
 
-## Prerequisites
-1.  **Ollama** installed and running (`ollama serve`).
-2.  **Model**: `qwen3:4b` pulled (`ollama pull qwen3:4b`).
-3.  **Python 3.x**
-4.  **Dependencies**: `pandas`, `openpyxl`, `requests`.
+## ✨ Overview
+**QA TestCase Buddy** is a premium, AI-powered local tool designed to streamline the test case generation process. By leveraging the **Ollama `qwen3:4b`** model, it transforms raw requirements into structured, high-quality QA test cases in seconds.
 
-## How to Run
+Whether you prefer a lightning-fast **CLI** or a modern, glassmorphic **Web UI**, QA TestCase Buddy has you covered.
 
-### Interactive Mode (CLI)
-```powershell
-python run_generator.py
-```
-Paste your requirements, then type `DONE`.
+## 🛠️ Key Features
+- **Instant Generation**: Convert complex feature descriptions into detailed test steps and expected results.
+- **Dual Interface**: Use the terminal for quick tasks or the web dashboard for a visual experience.
+- **Excel Export**: Download your generated cases directly into professional Excel spreadsheets.
+- **Performance Tracking**: Built-in execution timer to monitor AI response speed.
+- **Local & Private**: Runs entirely on your machine using Ollama—no data leaves your system.
+- **Premium Design**: Dark mode aesthetic with smooth animations and a glassmorphic UI.
 
-### One-Liner Mode (CLI)
-```powershell
-python run_generator.py "Your requirements here..."
-```
+## 📋 Prerequisites
+1. **Ollama**: Must be installed and running (`ollama serve`).
+2. **Model**: Pull the required model:
+   ```powershell
+   ollama pull qwen3:4b
+   ```
+3. **Python 3.x**: Ensure Python is installed.
+4. **Dependencies**:
+   ```powershell
+   pip install pandas openpyxl requests flask
+   ```
 
-## 🌐 Web Interface
+## 🚀 Getting Started
 
-Prefer a graphical interface? We have a modern web UI.
+### 1. Web Interface (Recommended)
+1. Start the server:
+   ```powershell
+   python app.py
+   ```
+2. Open [http://localhost:5000](http://localhost:5000) in your browser.
 
-### How to Run
-1.  Start the backend server:
-    ```powershell
-    python app.py
-    ```
-2.  Open your browser and navigate to:
-    [http://localhost:5000](http://localhost:5000)
+### 2. CLI Mode
+- **Interactive**: `python run_generator.py` (Type `DONE` when finished).
+- **One-Liner**: `python run_generator.py "User login with 2FA"`
 
-### Features
--   **Visual Table**: View generated cases instantly.
--   **Excel Download**: One-click export.
--   **Execution Time**: View how long the generation took.
--   **Premium Design**: Dark mode with glassmorphism aesthetics.
+## 🔧 Internal Architecture
+The project follows a robust 3-layer architecture:
+- **Layer 1 (Architecture)**: Defined SOPs and logic workflows.
+- **Layer 2 (Navigation)**: Flask routing and CLI decision logic.
+- **Layer 3 (Tools)**: Deterministic Python engines for API interaction and Excel generation.
 
-## Troubleshooting
--   **Empty Output / JSON Errors**: The model (`qwen3:4b`) can be sensitive. We have disabled strict JSON mode to help it output text. If it fails, try re-running with a simpler prompt.
--   **Excel Error**: Close `test_cases.xlsx` if it is open before running the script.
+## 🤝 Troubleshooting
+- **Empty Output**: If the model returns partial data, try simplifying the requirement prompt.
+- **Excel Errors**: Ensure `test_cases.xlsx` is closed before generating new results.
+- **Git Issues**: Ensure the `assets/` folder is included in your commits to see the header image.
+
+---
+*Built with ❤️ for QA Engineers who value speed and style.*
