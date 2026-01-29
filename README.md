@@ -1,7 +1,7 @@
 # 🚀 QA TestCase Buddy
 
-![QA TestCase Buddy Loading](assets/ui_loading.png)
-![QA TestCase Buddy Results](assets/ui_results_v2.png)
+![QA TestCase Buddy](assets/ui_v3_dark.png)
+![QA TestCase Buddy Results](assets/ui_results_v3_dark.png)
 
 ## ✨ Overview
 **QA TestCase Buddy** is a premium, AI-powered local tool designed to streamline the test case generation process. By leveraging **LM Studio** (OpenAI-compatible local server), it transforms raw requirements into structured, high-quality QA test cases in seconds.
