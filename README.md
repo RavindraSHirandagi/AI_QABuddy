@@ -4,28 +4,31 @@
 ![QA TestCase Buddy Results](assets/ui_results_v2.png)
 
 ## ✨ Overview
-**QA TestCase Buddy** is a premium, AI-powered local tool designed to streamline the test case generation process. By leveraging the **Ollama `qwen3:4b`** model, it transforms raw requirements into structured, high-quality QA test cases in seconds.
+**QA TestCase Buddy** is a premium, AI-powered local tool designed to streamline the test case generation process. By leveraging **LM Studio** (OpenAI-compatible local server), it transforms raw requirements into structured, high-quality QA test cases in seconds.
 
 Whether you prefer a lightning-fast **CLI** or a modern, glassmorphic **Web UI**, QA TestCase Buddy has you covered.
 
 ## 🛠️ Key Features
 - **Instant Generation**: Convert complex feature descriptions into detailed test steps and expected results.
-- **Dual Interface**: Use the terminal for quick tasks or the web dashboard for a visual experience.
+- **Smart Model Selection**: Automatically detects and lists available models from LM Studio using a dropdown.
+- **Dual Input Modes**:
+    1. **Feature Info**: Type requirements manually.
+    2. **Attach PRD**: Upload requirement documents (**PDF, DOCX, TXT**) for context-aware generation.
+- **Status Dashboard**: Real-time feedback box showing connection status and generation progress.
 - **Excel Export**: Download your generated cases directly into professional Excel spreadsheets.
 - **Performance Tracking**: Built-in execution timer to monitor AI response speed.
-- **Local & Private**: Runs entirely on your machine using Ollama—no data leaves your system.
+- **Local & Private**: Runs entirely on your machine using LM Studio—no data leaves your system.
 - **Premium Design**: Dark mode aesthetic with smooth animations and a glassmorphic UI.
 
 ## 📋 Prerequisites
-1. **Ollama**: Must be installed and running (`ollama serve`).
-2. **Model**: Pull the required model:
+1. **LM Studio**: Must be installed and running.
+   - **Start the Server**: Enable the Local Server in LM Studio (typically port `1234`).
+   - **CLI Tool**: (Optional) Install the `lms` CLI tool so the app can auto-start the server.
+   - **Load a Model**: Load a model (e.g., **Mistral**, Llama 3) in LM Studio before running the tool.
+2. **Python 3.x**: Ensure Python is installed.
+3. **Dependencies**:
    ```powershell
-   ollama pull qwen3:4b
-   ```
-3. **Python 3.x**: Ensure Python is installed.
-4. **Dependencies**:
-   ```powershell
-   pip install pandas openpyxl requests flask
+   pip install pandas openpyxl requests flask pypdf python-docx
    ```
 
 ## 🚀 Getting Started
@@ -36,6 +39,9 @@ Whether you prefer a lightning-fast **CLI** or a modern, glassmorphic **Web UI**
    python app.py
    ```
 2. Open [http://localhost:5000](http://localhost:5000) in your browser.
+3. **Connect**: The app will auto-connect to LM Studio. If not, the Status Box will guide you.
+4. **Select Input**: Toggle between "Feature Info" (Text) or "Attach PRD" (File Upload).
+5. **Generate**: Click the button and watch the magic happen!
 
 ### 2. CLI Mode
 - **Interactive**: `python run_generator.py` (Type `DONE` when finished).
@@ -52,6 +58,7 @@ AITestGenerator/
 ├── templates/             # HTML Templates (Flask)
 ├── tools/                 # Layer 3: Deterministic Python Engines
 │   ├── generate_test_cases.py # AI Integration Logic
+│   ├── file_parser.py         # PDF/DOCX/TXT Parsers
 │   ├── save_to_excel.py       # Excel Export Engine
 │   ├── handshake.py           # Connection Verification
 │   └── debug_model.py         # Model Testing Utility

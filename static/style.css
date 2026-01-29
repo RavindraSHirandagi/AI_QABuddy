@@ -41,7 +41,12 @@ h1 {
     font-weight: 600;
     font-size: 2.5rem;
     margin: 0 0 10px 0;
+    color: var(--text-main);
+}
+
+.gradient-text {
     background: linear-gradient(to right, #60a5fa, #a78bfa);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -51,27 +56,51 @@ p {
     font-size: 1.1rem;
 }
 
-textarea {
+/* Form Elements: Input, Select, Textarea */
+textarea,
+input,
+select {
     width: 100%;
-    height: 120px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.08);
     border: 1px solid var(--glass-border);
     border-radius: 12px;
     padding: 16px;
     color: white;
     font-family: inherit;
     font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+textarea {
+    height: 120px;
     resize: vertical;
     margin-bottom: 20px;
-    box-sizing: border-box;
-    transition: border-color 0.2s;
 }
 
-textarea:focus {
+input,
+select {
+    padding: 12px;
+    height: 46px;
+    /* Uniform height */
+}
+
+textarea:focus,
+input:focus,
+select:focus {
     outline: none;
     border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.12);
 }
 
+/* Dark Mode Dropdown Fix */
+option {
+    background-color: #1e293b;
+    color: white;
+    padding: 8px;
+}
+
+/* Buttons */
 button {
     background: var(--primary);
     color: white;
@@ -83,6 +112,9 @@ button {
     cursor: pointer;
     transition: transform 0.1s, background 0.2s;
     width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 button:hover {
@@ -105,6 +137,16 @@ button:disabled {
     background: rgba(255, 255, 255, 0.1);
 }
 
+.icon-btn {
+    padding: 0;
+    width: 46px;
+    /* Match input height */
+    height: 46px;
+    border-radius: 12px;
+    font-size: 1.2rem;
+}
+
+/* Utilities */
 .hidden {
     display: none;
 }
@@ -190,4 +232,123 @@ td pre {
 
 tr:last-child td {
     border-bottom: none;
+}
+
+/* Status Box */
+.status-box {
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.status-icon {
+    font-size: 1.2rem;
+}
+
+.status-label {
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.status-info {
+    border-color: rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.1);
+    color: #bfdbfe;
+}
+
+.status-success {
+    border-color: rgba(34, 197, 94, 0.3);
+    background: rgba(34, 197, 94, 0.1);
+    color: #86efac;
+}
+
+.status-error {
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+}
+
+/* Input Method Toggle */
+.toggle-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+
+.toggle-btn {
+    flex: 1;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    height: auto;
+}
+
+.toggle-btn.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-btn:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.05);
+    transform: none;
+    color: var(--text-main);
+}
+
+/* File Upload Area */
+.file-upload-area {
+    border: 2px dashed var(--glass-border);
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+    cursor: pointer;
+    display: none;
+    /* Hidden by default */
+}
+
+.file-upload-area.active {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.file-upload-area:hover {
+    border-color: var(--primary);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.file-icon {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    display: block;
+    opacity: 0.8;
+}
+
+.file-name {
+    margin-top: 10px;
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+.hidden-input {
+    display: none;
 }

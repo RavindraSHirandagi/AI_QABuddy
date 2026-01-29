@@ -8,18 +8,19 @@ def save_cases_to_excel(test_cases, filename="test_cases.xlsx"):
     try:
         df = pd.DataFrame(test_cases)
         
-        # Ensure distinct columns order
-        cols = ["test_name", "steps", "expected_result"]
-        # Filter for only available columns to avoid errors if keys mismatch
-        cols = [c for c in cols if c in df.columns]
-        df = df[cols]
+        df = pd.DataFrame(test_cases)
         
-        # Rename for better readability
-        df.rename(columns={
-            "test_name": "Test Name",
-            "steps": "Steps",
-            "expected_result": "Expected Result"
-        }, inplace=True)
+        # Define preferred column order
+        preferred_order = ["TID", "TestType", "Priority", "TestCaseName", "Steps", "Expected_Result"]
+        
+        # Normalize column names to match preferred order (simple mapping)
+        # Verify which columns actually exist in the dataframe
+        existing_cols = list(df.columns)
+        
+        # Create a sorted list of columns: preferred ones first, then others
+        final_cols = [c for c in preferred_order if c in existing_cols] + [c for c in existing_cols if c not in preferred_order]
+        
+        df = df[final_cols]
         
         df.to_excel(filename, index=False)
         print(f"Successfully saved {len(df)} test cases to {os.path.abspath(filename)}")

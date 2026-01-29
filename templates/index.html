@@ -14,14 +14,56 @@
 <body>
     <div class="glass-container">
         <header>
-            <h1>🚀 QA TestCase Buddy</h1>
+            <h1>🚀 <span class="gradient-text"></span>QA TestCase Buddy</span></h1>
             <p>AI-Powered Local Test Case Creator</p>
         </header>
 
         <main>
+            <!-- Status Box -->
+            <div id="statusBox" class="status-box status-info">
+                <div class="status-icon">ℹ️</div>
+                <div>
+                    <span class="status-label">Status:</span>
+                    <span id="statusText">Initializing...</span>
+                </div>
+            </div>
+
+            <!-- Input Method Toggle -->
+            <div class="toggle-container">
+                <button class="toggle-btn active" onclick="switchInput('manual')">📝 Feature Info</button>
+                <button class="toggle-btn" onclick="switchInput('file')">📎 Attach PRD</button>
+            </div>
+
             <div class="input-section">
+                <!-- Model Selector -->
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: flex-end;">
+                    <div style="flex: 1;">
+                        <label for="modelSelect"
+                            style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Select
+                            Model</label>
+                        <select id="modelSelect">
+                            <option value="" disabled selected>Loading models...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button onclick="fetchModels()" class="secondary-btn icon-btn" title="Refresh Models">↻</button>
+                    </div>
+                </div>
+
+                <!-- Text Input Area -->
                 <textarea id="promptInput"
                     placeholder="Describe your feature (e.g., 'Login page with 2FA')..."></textarea>
+
+                <!-- File Upload Area -->
+                <div id="fileUploadArea" class="file-upload-area"
+                    onclick="document.getElementById('fileInput').click()">
+                    <div class="file-icon">📄</div>
+                    <p>Click to upload PRD (.pdf, .docx, .txt)</p>
+                    <p class="file-name" id="fileName"></p>
+                    <input type="file" id="fileInput" class="hidden-input" accept=".pdf,.docx,.txt"
+                        onchange="handleFileSelect(this)">
+                </div>
+
                 <button id="generateBtn" onclick="generateCtx()">Generate Test Cases</button>
             </div>
 
@@ -40,7 +82,10 @@
                     <table id="resultsTable">
                         <thead>
                             <tr>
-                                <th>Test Name</th>
+                                <th>TID</th>
+                                <th>Type</th>
+                                <th>Priority</th>
+                                <th>Test Case Name</th>
                                 <th>Steps</th>
                                 <th>Expected Result</th>
                             </tr>
@@ -56,37 +101,176 @@
 
     <script>
         let currentCases = [];
+        let currentModelName = "unknown_model";
+        let inputMode = 'manual'; // 'manual' or 'file'
+        const baseUrl = "http://localhost:1234";
+
+        document.addEventListener('DOMContentLoaded', fetchModels);
+
+        function switchInput(mode) {
+            inputMode = mode;
+            const textInput = document.getElementById('promptInput');
+            const fileArea = document.getElementById('fileUploadArea');
+            const btns = document.querySelectorAll('.toggle-btn');
+
+            if (mode === 'manual') {
+                textInput.style.display = 'block';
+                fileArea.classList.remove('active');
+                btns[0].classList.add('active');
+                btns[1].classList.remove('active');
+            } else {
+                textInput.style.display = 'none';
+                fileArea.classList.add('active');
+                btns[0].classList.remove('active');
+                btns[1].classList.add('active');
+            }
+        }
+
+        function handleFileSelect(input) {
+            const fileName = document.getElementById('fileName');
+            if (input.files && input.files[0]) {
+                fileName.textContent = "Selected: " + input.files[0].name;
+            } else {
+                fileName.textContent = "";
+            }
+        }
+
+        function updateStatus(message, type = 'info') {
+            const el = document.getElementById('statusBox');
+            const textEl = document.getElementById('statusText');
+            const iconEl = document.querySelector('.status-icon');
+
+            // Reset classes
+            el.className = 'status-box';
+
+            if (type === 'success') {
+                el.classList.add('status-success');
+                iconEl.textContent = '✅';
+            } else if (type === 'error') {
+                el.classList.add('status-error');
+                iconEl.textContent = '❌';
+            } else {
+                el.classList.add('status-info');
+                iconEl.textContent = 'ℹ️';
+            }
+
+            textEl.textContent = message;
+        }
+
+        async function fetchModels() {
+            const select = document.getElementById('modelSelect');
+
+            updateStatus("Connecting to Local AI...", 'info');
+            select.innerHTML = '<option>Loading...</option>';
+
+            try {
+                const response = await fetch(`/get_models?base_url=${encodeURIComponent(baseUrl)}`);
+                const data = await response.json();
+                const models = data.models || [];
+
+                select.innerHTML = '';
+
+                if (models.length === 0) {
+                    const option = document.createElement('option');
+                    option.text = "No models found (Is LM Studio running?)";
+                    select.add(option);
+                    updateStatus("No models found. Please check LM Studio.", 'error');
+                    return;
+                }
+
+                updateStatus(`Connected: Found ${models.length} models`, 'success');
+
+                let mistralIndex = -1;
+
+                models.forEach((model, index) => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.text = model;
+                    select.add(option);
+
+                    if (model.toLowerCase().includes('mistral')) {
+                        mistralIndex = index;
+                    }
+                });
+
+                if (mistralIndex !== -1) {
+                    select.selectedIndex = mistralIndex;
+                } else {
+                    select.selectedIndex = 0;
+                }
+
+            } catch (e) {
+                console.error("Failed to fetch models:", e);
+                select.innerHTML = '<option>Connection Failed</option>';
+                updateStatus(`Connection Failed: Make sure LM Studio is running.`, 'error');
+            }
+        }
 
         async function generateCtx() {
-            const prompt = document.getElementById('promptInput').value;
-            if (!prompt) return alert("Please enter a requirement.");
+            const model = document.getElementById('modelSelect').value;
 
+            // Validate Information Before Creating FormData
+            if (inputMode === 'manual') {
+                const prompt = document.getElementById('promptInput').value;
+                if (!prompt) return alert("Please enter a requirement.");
+            } else {
+                const fileInput = document.getElementById('fileInput');
+                if (!fileInput.files || !fileInput.files[0]) return alert("Please upload a file.");
+            }
+
+            if (!model || model.startsWith("No models") || model.startsWith("Connection")) {
+                alert("Please ensure a valid model is selected.");
+                return;
+            }
+
+            // Set up UI for generation
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('resultsSection').classList.add('hidden');
             document.getElementById('generateBtn').disabled = true;
+            document.getElementById('modelSelect').disabled = true; // Disable Dropdown
+            updateStatus("Reading input & Generating test cases...", 'info');
+
+            // Prepare Data
+            let formData = new FormData();
+            formData.append('model', model);
+            formData.append('base_url', baseUrl);
+
+            if (inputMode === 'manual') {
+                const prompt = document.getElementById('promptInput').value;
+                formData.append('prompt', prompt);
+            } else {
+                const fileInput = document.getElementById('fileInput');
+                formData.append('file', fileInput.files[0]);
+                formData.append('prompt', "Generate test cases based on this uploaded document.");
+            }
 
             try {
                 const response = await fetch('/generate', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt })
+                    body: formData // Send as FormData (automatically sets Multipart header)
                 });
 
                 const data = await response.json();
 
                 if (data.error) {
                     alert("Error: " + data.error);
+                    updateStatus("Generation failed: " + data.error, 'error');
                 } else {
                     currentCases = data.test_cases;
+                    currentModelName = data.model_name || "unknown_model"; // Store model name
                     const timeTaken = data.execution_time || 0;
-                    document.getElementById('execTime').textContent = `(${timeTaken}s)`;
+                    const mins = (timeTaken / 60).toFixed(2);
+                    document.getElementById('execTime').textContent = `(${timeTaken}s | ${mins}m)`;
                     renderTable(currentCases);
+                    updateStatus("Test cases generated successfully!", 'success');
                 }
             } catch (e) {
                 alert("Network error: " + e);
+                updateStatus("Network error occurred.", 'error');
             } finally {
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('generateBtn').disabled = false;
+                document.getElementById('modelSelect').disabled = false; // Enable Dropdown
             }
         }
 
@@ -96,16 +280,29 @@
 
             cases.forEach(c => {
                 const row = document.createElement('tr');
+
+                // Map fields with fallbacks
+                const tid = c.TID || c.tid || '-';
+                const type = c.TestType || c.test_type || c.type || '-';
+                const prio = c.Priority || c.priority || '-';
+                const name = c.TestCaseName || c.test_case_name || c.test_name || '-';
+                const steps = c.Steps || c.steps || '-';
+                const exp = c.Expected_Result || c.expected_result || '-';
+
                 row.innerHTML = `
-                    <td>${c.test_name || c.Test_Name || '-'}</td>
-                    <td><pre>${c.steps || c.Steps || '-'}</pre></td>
-                    <td>${c.expected_result || c.Expected_Result || '-'}</td>
+                    <td style="font-weight: bold; color: #60a5fa;">${tid}</td>
+                    <td><span style="background:rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">${type}</span></td>
+                    <td>${prio}</td>
+                    <td>${name}</td>
+                    <td><pre>${steps}</pre></td>
+                    <td>${exp}</td>
                 `;
                 tbody.appendChild(row);
             });
 
             document.getElementById('resultsSection').classList.remove('hidden');
         }
+
 
         async function downloadExcel() {
             if (currentCases.length === 0) return;
@@ -121,7 +318,11 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'test_cases.xlsx';
+
+                // Clean filename chars
+                const safeModelName = currentModelName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                a.download = `LLM_TestCase_${safeModelName}.xlsx`;
+
                 document.body.appendChild(a);
                 a.click();
                 a.remove();

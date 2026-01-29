@@ -21,3 +21,8 @@
     - [x] Create Frontend (`index.html`, `style.css`)
     - [x] Connect to Tools
     - [x] Verify Browser Output
+- [x] **Phase 7: Advanced Features (Current)**
+    - [x] Migrate to LM Studio
+    - [x] Implement PRD File Upload (PDF/DOCX)
+    - [x] Enhance Schema (TID, Priority, 5 Types)
+    - [x] Dynamic Excel Filenames

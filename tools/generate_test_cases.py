@@ -2,25 +2,69 @@ import requests
 import json
 import sys
 
-def generate_cases_from_ollama(prompt, model="qwen3:4b"):
+def generate_cases_from_lm_studio(prompt, model, base_url="http://localhost:1234"):
     """
-    Generates test cases from Ollama given a prompt.
+    Generates test cases from LM Studio (OpenAI compatible) given a prompt.
     Returns a list of dictionaries.
     """
-    url = "http://localhost:11434/api/generate"
+    # Clean base url
+    base_url = base_url.rstrip('/')
+
+    # Try flexible connection if default
+    candidates = [base_url]
+    if "localhost" in base_url:
+        candidates.append(base_url.replace("localhost", "127.0.0.1"))
+    elif "127.0.0.1" in base_url:
+        candidates.append(base_url.replace("127.0.0.1", "localhost"))
     
+    url = None
     
-    # Simplified prompt for VL model which might behave better with direct instructions
-    final_prompt = f"""
-    You are a QA Engineer. Generate test cases for this requirement: "{prompt}"
+    # Simple check to see which one works
+    for base in candidates:
+        try:
+            # Quick check if server is reachable
+            test_resp = requests.get(f"{base}/v1/models", timeout=1)
+            if test_resp.status_code == 200:
+                url = f"{base}/v1/chat/completions"
+                break
+        except:
+            continue
+            
+    if not url:
+        print(f"Error: Could not find running LM Studio instance at {base_url}.")
+        # Fallback to provided url even if check failed, just in case
+        url = f"{base_url}/v1/chat/completions"
     
-    Return ONLY valid JSON with this structure:
+    if not model:
+        print("Error: No model specified.")
+        return None
+
+    # System instruction + User prompt
+    system_message = "You are a QA Engineer. Output ONLY valid JSON."
+    
+    user_message = f"""
+    Act as a Senior QA Engineer. Generate detailed test cases for the following requirement: "{prompt}"
+
+    ### RULES:
+    1.  **Test Types**: You MUST generate test cases for ALL of the following categories:
+        *   **Functional**
+        *   **Non-Functional**
+        *   **Negative**
+        *   **Positive**
+        *   **Security**
+    2.  **Quantity**: Generate **AT LEAST 5** test cases for **EACH** category. (Total minimum 25 test cases).
+    3.  **Format**: Return ONLY valid JSON.
+    
+    ### JSON Structure:
     {{
       "test_cases": [
         {{
-          "test_name": "...",
-          "steps": "...",
-          "expected_result": "..."
+          "TID": "TC_001",
+          "TestCaseName": "Verify user login with valid credentials",
+          "Steps": "1. Open URL\\n2. Enter User\\n3. Enter Pass\\n4. Click Login",
+          "Expected_Result": "User should be logged in successfully.",
+          "Priority": "High",
+          "TestType": "Functional"
         }}
       ]
     }}
@@ -28,21 +72,31 @@ def generate_cases_from_ollama(prompt, model="qwen3:4b"):
     
     payload = {
         "model": model,
-        "prompt": final_prompt,
+        "messages": [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message}
+        ],
+        "temperature": 0.7,
         "stream": False
-        # "format": "json" # Disabled to prevent empty response from VL model
     }
     
     try:
-        print(f"Generating test cases with {model}...")
+        print(f"Generating test cases with {model} via LM Studio...")
         response = requests.post(url, json=payload)
         response.raise_for_status()
         
         data = response.json()
-        raw_response = data.get("response", "")
         
-        # DEBUG: Print raw response to see what went wrong
-        print(f"DEBUG info: {raw_response}")
+        # OpenAI format: choices[0].message.content
+        if "choices" in data and len(data["choices"]) > 0:
+            raw_response = data["choices"][0]["message"]["content"]
+        else:
+            print("Error: Unexpected response format from LM Studio.")
+            print(f"Full response: {data}")
+            return None
+        
+        # DEBUG: Print raw response
+        print(f"DEBUG info: {raw_response[:200]}...")
 
         # Attempt to clean up JSON (Remove markdown ```json ... ```)
         import re
@@ -60,7 +114,7 @@ def generate_cases_from_ollama(prompt, model="qwen3:4b"):
              return parsed
 
     except requests.exceptions.RequestException as e:
-        print(f"Error communicating with Ollama: {e}")
+        print(f"Error communicating with LM Studio: {e}")
         return None
     except json.JSONDecodeError:
         print("Error: Model did not return valid JSON.")
@@ -71,7 +125,9 @@ def generate_cases_from_ollama(prompt, model="qwen3:4b"):
         return None
 
 if __name__ == "__main__":
-    # Test run
+    # Test run (ensure you have a model running or replace validation)
     test_input = "Login page with username and password"
-    result = generate_cases_from_ollama(test_input)
-    print(json.dumps(result, indent=2))
+    # Pass a dummy model name for the test run if needed, or rely on caller
+    result = generate_cases_from_lm_studio(test_input, "mistral") 
+    if result:
+        print(json.dumps(result, indent=2))
