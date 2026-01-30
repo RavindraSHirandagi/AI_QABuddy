@@ -5,9 +5,8 @@
 - `user_requirements`: String (Raw text pasted by user or parsed from file).
 - `input_file`: Optional PDF/DOCX/TXT file.
 
-### Intermediate (LLM Response)
-- Format: JSON
-- Structure:
+### Intermediate (LLM Output)
+1. **Test Cases (JSON)**:
     ```json
     {
       "test_cases": [
@@ -22,21 +21,36 @@
       ]
     }
     ```
+2. **Test Plan (JSON)**:
+    ```json
+    {
+      "plan_title": "String",
+      "sections": [
+        { "heading": "1.0 Introduction", "content": "..." },
+        { "heading": "2.0 Scope", "content": "..." }
+        // ... (Strict 10 sections)
+      ]
+    }
+    ```
 
 ### Output (Payload)
-- File: `LLM_TestCase_<ModelName>.xlsx`
-- Columns: `TID`, `TestType`, `Priority`, `TestCaseName`, `Steps`, `Expected Result`
+- **Test Cases**: `LLM_TestCase_<ModelName>.xlsx`
+- **Test Plan**: 
+    - `LLM_TestPlan_<ModelName>.docx`
+    - `LLM_TestPlan_<ModelName>.pdf`
 
 ## Behavioral Rules
-- **Model**: Use local models via **LM Studio** (OpenAI-compatible API).
+- **Model Provider**: **Ollama** (Default: `http://localhost:11434`).
 - **Test Coverage**: MANDATORY 5 test cases per category (Functional, Non-Functional, Negative, Positive, Security).
+- **Test Plan**: MANDATORY 10-section standard format.
 - **Reliability**: Always validate JSON structure before parsing.
-- **Self-Healing**: If JSON is malformed, attempt to repair or regex extract.
+- **Self-Healing**: Use `repair_json` to fix malformed or truncated LLM responses.
+- **Timeouts**: Allow up to **2000 seconds** (~33 mins) for generation.
 
 ## Architectural Invariants
 - 3-Layer Architecture:
     1. Architecture (SOPs)
     2. Navigation (Logic)
     3. Tools (Atomic Scripts)
-- Code only starts after Payload shape confirmation.
 - `gemini.md` is law.
+- Code only starts after Payload shape confirmation.

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QA TestCase Buddy</title>
+    <title>QA Buddy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
@@ -12,106 +12,251 @@
 </head>
 
 <body>
-    <div class="glass-container">
-        <header>
-            <h1>🚀 <span class="gradient-text"></span>QA TestCase Buddy</span></h1>
-            <p>AI-Powered Local Test Case Creator</p>
-        </header>
-
-        <main>
-            <!-- Status Box -->
-            <div id="statusBox" class="status-box status-info">
-                <div class="status-icon">ℹ️</div>
-                <div>
-                    <span class="status-label">Status:</span>
-                    <span id="statusText">Initializing...</span>
-                </div>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo-emoji">🤖</span>
+                <h3>QA Buddy</h3>
             </div>
-
-            <!-- Input Method Toggle -->
-            <div class="toggle-container">
-                <button class="toggle-btn active" onclick="switchInput('manual')">📝 Feature Info</button>
-                <button class="toggle-btn" onclick="switchInput('file')">📎 Attach PRD</button>
+            <nav>
+                <button class="nav-item active" onclick="switchPanel('testcase')">
+                    <span class="icon">🚀</span> TestCase Buddy
+                </button>
+                <button class="nav-item" onclick="switchPanel('testplan')">
+                    <span class="icon">📋</span> TestPlan Buddy
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <p>v2.2.0 (Ollama)</p>
             </div>
+        </aside>
 
-            <div class="input-section">
-                <!-- Model Selector -->
-                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: flex-end;">
-                    <div style="flex: 1;">
-                        <label for="modelSelect"
-                            style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Select
-                            Model</label>
-                        <select id="modelSelect">
-                            <option value="" disabled selected>Loading models...</option>
-                        </select>
+        <!-- Main Content Area -->
+        <main class="main-content">
+
+            <!-- PANEL 1: Test Case Buddy (Existing) -->
+            <div id="panel-testcase" class="content-panel active">
+                <div class="glass-container">
+                    <header>
+                        <h1>🚀 <span class="gradient-text">QA TestCase Buddy</span></h1>
+                        <p>AI-Powered Local Test Case Creator (Ollama)</p>
+                    </header>
+
+                    <!-- Status Box (Shared/Duplicated for visual) -->
+                    <div id="statusBox" class="status-box status-info">
+                        <div class="status-icon">ℹ️</div>
+                        <div>
+                            <span class="status-label">Status:</span>
+                            <span id="statusText">Ready</span>
+                        </div>
                     </div>
-                    <div>
-                        <button onclick="fetchModels()" class="secondary-btn icon-btn" title="Refresh Models">↻</button>
+
+                    <!-- Input Method Toggle -->
+                    <div class="toggle-container">
+                        <button class="toggle-btn active" onclick="switchInput('manual', 'case')">📝 Feature
+                            Info</button>
+                        <button class="toggle-btn" onclick="switchInput('file', 'case')">📎 Attach PRD</button>
+                    </div>
+
+                    <div class="input-section">
+
+                        <!-- Model Selector -->
+                        <div class="model-row">
+                            <div style="flex: 1;">
+                                <label class="input-label">Select Model (Ollama)</label>
+                                <select id="modelSelect" class="model-select">
+                                    <option value="" disabled selected>Loading models...</option>
+                                </select>
+                            </div>
+                            <button onclick="fetchModels()" class="secondary-btn icon-btn"
+                                title="Refresh Models">↻</button>
+                        </div>
+
+                        <!-- Text Input Area -->
+                        <textarea id="promptInput"
+                            placeholder="Describe your feature (e.g., 'Login page with 2FA')..."></textarea>
+
+                        <!-- File Upload Area -->
+                        <div id="fileUploadArea" class="file-upload-area"
+                            onclick="document.getElementById('fileInput').click()">
+                            <div class="file-icon">📄</div>
+                            <p>Click to upload PRD (.pdf, .docx, .txt)</p>
+                            <p class="file-name" id="fileName"></p>
+                            <input type="file" id="fileInput" class="hidden-input" accept=".pdf,.docx,.txt"
+                                onchange="handleFileSelect(this, 'fileName')">
+                        </div>
+
+                        <button id="generateBtn" onclick="generateCtx()">Generate Test Cases</button>
+                    </div>
+
+                    <div id="loading" class="hidden">
+                        <div class="spinner"></div>
+                        <p>Consulting the AI core...</p>
+                        <p id="timerDisplay" style="font-family: monospace; color: #60a5fa; margin-top: 5px;">0.0s</p>
+                    </div>
+
+                    <div id="resultsSection" class="hidden">
+                        <div class="results-header">
+                            <h2>Generated Cases <span id="execTime" class="time-tag"></span></h2>
+                            <button id="downloadBtn" class="secondary-btn" onclick="downloadExcel()">Download
+                                Excel</button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="resultsTable">
+                                <thead>
+                                    <tr>
+                                        <th>TID</th>
+                                        <th>Type</th>
+                                        <th>Priority</th>
+                                        <th>Test Case Name</th>
+                                        <th>Steps</th>
+                                        <th>Expected Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Text Input Area -->
-                <textarea id="promptInput"
-                    placeholder="Describe your feature (e.g., 'Login page with 2FA')..."></textarea>
-
-                <!-- File Upload Area -->
-                <div id="fileUploadArea" class="file-upload-area"
-                    onclick="document.getElementById('fileInput').click()">
-                    <div class="file-icon">📄</div>
-                    <p>Click to upload PRD (.pdf, .docx, .txt)</p>
-                    <p class="file-name" id="fileName"></p>
-                    <input type="file" id="fileInput" class="hidden-input" accept=".pdf,.docx,.txt"
-                        onchange="handleFileSelect(this)">
-                </div>
-
-                <button id="generateBtn" onclick="generateCtx()">Generate Test Cases</button>
             </div>
 
-            <div id="loading" class="hidden">
-                <div class="spinner"></div>
-                <p>Consulting the AI core...</p>
+            <!-- PANEL 2: Test Plan Buddy (New) -->
+            <div id="panel-testplan" class="content-panel hidden">
+                <div class="glass-container">
+                    <header>
+                        <h1>📋 <span class="gradient-text">QA TestPlan Buddy</span></h1>
+                        <p>AI-Powered Master Test Plan Generator</p>
+                    </header>
+
+                    <!-- Status Box Plan -->
+                    <div id="statusBoxPlan" class="status-box status-info">
+                        <div class="status-icon">ℹ️</div>
+                        <div>
+                            <span class="status-label">Status:</span>
+                            <span id="statusTextPlan">Ready</span>
+                        </div>
+                    </div>
+
+                    <!-- Input Method Toggle Plan -->
+                    <div class="toggle-container">
+                        <button class="toggle-btn active" onclick="switchInput('manual', 'plan')">📝 Project
+                            Scope</button>
+                        <button class="toggle-btn" onclick="switchInput('file', 'plan')">📎 Attach Specs</button>
+                    </div>
+
+                    <div class="input-section">
+                        <!-- Model Selector Plan -->
+                        <div class="model-row">
+                            <div style="flex: 1;">
+                                <label class="input-label">Select Model (Ollama)</label>
+                                <select id="modelSelectPlan" class="model-select">
+                                    <option value="" disabled selected>Loading models...</option>
+                                </select>
+                            </div>
+                            <button onclick="fetchModels()" class="secondary-btn icon-btn"
+                                title="Refresh Models">↻</button>
+                        </div>
+
+                        <!-- Text Input Area Plan -->
+                        <textarea id="promptInputPlan"
+                            placeholder="Describe the project scope for the Test Plan..."></textarea>
+
+                        <!-- File Upload Area Plan -->
+                        <div id="fileUploadAreaPlan" class="file-upload-area"
+                            onclick="document.getElementById('fileInputPlan').click()">
+                            <div class="file-icon">📄</div>
+                            <p>Click to upload Specs (.pdf, .docx)</p>
+                            <p class="file-name" id="fileNamePlan"></p>
+                            <input type="file" id="fileInputPlan" class="hidden-input" accept=".pdf,.docx,.txt"
+                                onchange="handleFileSelect(this, 'fileNamePlan')">
+                        </div>
+
+                        <button id="generateBtnPlan" onclick="generatePlanCtx()">Generate Test Plan</button>
+                    </div>
+
+                    <div id="loadingPlan" class="hidden">
+                        <div class="spinner"></div>
+                        <p>Architecting Test Strategy...</p>
+                        <p id="timerDisplayPlan" style="font-family: monospace; color: #60a5fa; margin-top: 5px;">0.0s
+                        </p>
+                    </div>
+
+                    <div id="resultsSectionPlan" class="hidden">
+                        <div class="results-header">
+                            <h2>Generated Plan <span id="execTimePlan" class="time-tag"></span></h2>
+                            <div class="download-group">
+                                <select id="downloadFormatSelect" class="model-select"
+                                    style="width: auto; padding: 5px 10px; margin-right: 5px;">
+                                    <option value="doc" selected>Word (DOCX)</option>
+                                    <option value="pdf">PDF</option>
+                                </select>
+                                <button class="secondary-btn" onclick="handlePlanDownload()">Download</button>
+                            </div>
+                        </div>
+                        <div id="planContent" class="plan-document">
+                            <!-- Plan Content Injected Here -->
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div id="resultsSection" class="hidden">
-                <div class="results-header">
-                    <h2>Generated Cases <span id="execTime"
-                            style="font-size: 0.8rem; opacity: 0.7; margin-left: 10px;"></span></h2>
-                    <button id="downloadBtn" class="secondary-btn" onclick="downloadExcel()">Download Excel</button>
-                </div>
-                <div class="table-wrapper">
-                    <table id="resultsTable">
-                        <thead>
-                            <tr>
-                                <th>TID</th>
-                                <th>Type</th>
-                                <th>Priority</th>
-                                <th>Test Case Name</th>
-                                <th>Steps</th>
-                                <th>Expected Result</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Rows injected here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </main>
     </div>
 
     <script>
         let currentCases = [];
+        let currentPlan = null;
         let currentModelName = "unknown_model";
-        let inputMode = 'manual'; // 'manual' or 'file'
-        const baseUrl = "http://localhost:1234";
+        let inputModeCase = 'manual';
+        let inputModePlan = 'manual';
 
-        document.addEventListener('DOMContentLoaded', fetchModels);
+        // Hardcode Ollama Base URL
+        const baseUrl = "http://localhost:11434";
 
-        function switchInput(mode) {
-            inputMode = mode;
-            const textInput = document.getElementById('promptInput');
-            const fileArea = document.getElementById('fileUploadArea');
-            const btns = document.querySelectorAll('.toggle-btn');
+        // Timer variables
+        let timerInterval;
+        let startTime;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchModels();
+            // Default to TestCase Buddy
+            switchPanel('testcase');
+        });
+
+        function switchPanel(panel) {
+            // nav active state
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(n => n.classList.remove('active'));
+
+            // panel visibility
+            const panels = document.querySelectorAll('.content-panel');
+            panels.forEach(p => p.classList.remove('active', 'hidden'));
+
+            if (panel === 'testcase') {
+                navItems[0].classList.add('active');
+                document.getElementById('panel-testcase').classList.add('active');
+                document.getElementById('panel-testplan').classList.add('hidden');
+            } else {
+                navItems[1].classList.add('active');
+                document.getElementById('panel-testplan').classList.add('active');
+                document.getElementById('panel-testcase').classList.add('hidden');
+            }
+        }
+
+        function switchInput(mode, context) {
+            const isCase = context === 'case';
+
+            if (isCase) inputModeCase = mode;
+            else inputModePlan = mode;
+
+            const panelId = isCase ? 'panel-testcase' : 'panel-testplan';
+            const suffix = isCase ? '' : 'Plan';
+
+            const textInput = document.getElementById(`promptInput${suffix}`);
+            const fileArea = document.getElementById(`fileUploadArea${suffix}`);
+            const panelEl = document.getElementById(panelId);
+            const btns = panelEl.querySelectorAll('.toggle-btn');
 
             if (mode === 'manual') {
                 textInput.style.display = 'block';
@@ -126,8 +271,8 @@
             }
         }
 
-        function handleFileSelect(input) {
-            const fileName = document.getElementById('fileName');
+        function handleFileSelect(input, labelId) {
+            const fileName = document.getElementById(labelId);
             if (input.files && input.files[0]) {
                 fileName.textContent = "Selected: " + input.files[0].name;
             } else {
@@ -135,13 +280,13 @@
             }
         }
 
-        function updateStatus(message, type = 'info') {
-            const el = document.getElementById('statusBox');
-            const textEl = document.getElementById('statusText');
-            const iconEl = document.querySelector('.status-icon');
+        function updateStatus(message, type = 'info', context = 'case') {
+            const suffix = context === 'case' ? '' : 'Plan';
+            const el = document.getElementById(`statusBox${suffix}`);
+            const textEl = document.getElementById(`statusText${suffix}`);
+            const iconEl = el.querySelector('.status-icon');
 
-            // Reset classes
-            el.className = 'status-box';
+            el.className = 'status-box'; // Reset
 
             if (type === 'success') {
                 el.classList.add('status-success');
@@ -158,120 +303,245 @@
         }
 
         async function fetchModels() {
-            const select = document.getElementById('modelSelect');
+            // Populate BOTH dropdowns
+            const selectCase = document.getElementById('modelSelect');
+            const selectPlan = document.getElementById('modelSelectPlan');
 
-            updateStatus("Connecting to Local AI...", 'info');
-            select.innerHTML = '<option>Loading...</option>';
+            [selectCase, selectPlan].forEach(s => s.innerHTML = '<option>Loading...</option>');
+            updateStatus("Connecting to Ollama...", 'info', 'case');
 
             try {
                 const response = await fetch(`/get_models?base_url=${encodeURIComponent(baseUrl)}`);
                 const data = await response.json();
                 const models = data.models || [];
 
-                select.innerHTML = '';
-
                 if (models.length === 0) {
-                    const option = document.createElement('option');
-                    option.text = "No models found (Is LM Studio running?)";
-                    select.add(option);
-                    updateStatus("No models found. Please check LM Studio.", 'error');
+                    [selectCase, selectPlan].forEach(s => {
+                        s.innerHTML = '';
+                        const option = document.createElement('option');
+                        option.text = "No models found";
+                        s.add(option);
+                    });
+                    updateStatus("No models found. Check Ollama running.", 'error', 'case');
                     return;
                 }
 
-                updateStatus(`Connected: Found ${models.length} models`, 'success');
+                updateStatus(`Connected: Found ${models.length} models`, 'success', 'case');
+                updateStatus(`Ready`, 'success', 'plan'); // Just set plan to ready silently
 
-                let mistralIndex = -1;
+                let llamaIndex = -1;
 
                 models.forEach((model, index) => {
-                    const option = document.createElement('option');
-                    option.value = model;
-                    option.text = model;
-                    select.add(option);
-
-                    if (model.toLowerCase().includes('mistral')) {
-                        mistralIndex = index;
-                    }
+                    if (model.toLowerCase().includes('llama')) llamaIndex = index;
                 });
 
-                if (mistralIndex !== -1) {
-                    select.selectedIndex = mistralIndex;
-                } else {
-                    select.selectedIndex = 0;
-                }
+                // Populate both
+                [selectCase, selectPlan].forEach(select => {
+                    select.innerHTML = '';
+                    models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model;
+                        option.text = model;
+                        select.add(option);
+                    });
+                    if (llamaIndex !== -1) select.selectedIndex = llamaIndex;
+                    else select.selectedIndex = 0;
+                });
 
             } catch (e) {
-                console.error("Failed to fetch models:", e);
-                select.innerHTML = '<option>Connection Failed</option>';
-                updateStatus(`Connection Failed: Make sure LM Studio is running.`, 'error');
+                console.error(e);
+                updateStatus("Connection Failed", 'error', 'case');
+                [selectCase, selectPlan].forEach(s => s.innerHTML = '<option>Connection Failed</option>');
             }
+        }
+
+        function startTimer(displayId) {
+            clearInterval(timerInterval);
+            startTime = Date.now();
+            const display = document.getElementById(displayId);
+            display.textContent = "0.0s";
+
+            timerInterval = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                if (elapsed < 60) {
+                    display.textContent = elapsed.toFixed(1) + "s";
+                } else {
+                    const mins = Math.floor(elapsed / 60);
+                    const secs = Math.floor(elapsed % 60);
+                    display.textContent = `${mins}m ${secs}s`;
+                }
+            }, 100);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
         }
 
         async function generateCtx() {
             const model = document.getElementById('modelSelect').value;
+            currentModelName = model;
+            if (!validateInput(model, inputModeCase, 'promptInput', 'fileInput')) return;
 
-            // Validate Information Before Creating FormData
-            if (inputMode === 'manual') {
-                const prompt = document.getElementById('promptInput').value;
-                if (!prompt) return alert("Please enter a requirement.");
-            } else {
-                const fileInput = document.getElementById('fileInput');
-                if (!fileInput.files || !fileInput.files[0]) return alert("Please upload a file.");
-            }
-
-            if (!model || model.startsWith("No models") || model.startsWith("Connection")) {
-                alert("Please ensure a valid model is selected.");
-                return;
-            }
-
-            // Set up UI for generation
+            // UI Setup
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('resultsSection').classList.add('hidden');
             document.getElementById('generateBtn').disabled = true;
-            document.getElementById('modelSelect').disabled = true; // Disable Dropdown
-            updateStatus("Reading input & Generating test cases...", 'info');
+            document.getElementById('modelSelect').disabled = true;
+            updateStatus("Generating test cases...", 'info', 'case');
 
-            // Prepare Data
-            let formData = new FormData();
-            formData.append('model', model);
-            formData.append('base_url', baseUrl);
+            startTimer('timerDisplay');
 
-            if (inputMode === 'manual') {
-                const prompt = document.getElementById('promptInput').value;
-                formData.append('prompt', prompt);
-            } else {
-                const fileInput = document.getElementById('fileInput');
-                formData.append('file', fileInput.files[0]);
-                formData.append('prompt', "Generate test cases based on this uploaded document.");
-            }
+            let formData = prepareFormData(model, inputModeCase, 'promptInput', 'fileInput');
 
             try {
-                const response = await fetch('/generate', {
-                    method: 'POST',
-                    body: formData // Send as FormData (automatically sets Multipart header)
-                });
-
+                const response = await fetch('/generate', { method: 'POST', body: formData });
                 const data = await response.json();
 
                 if (data.error) {
                     alert("Error: " + data.error);
-                    updateStatus("Generation failed: " + data.error, 'error');
+                    updateStatus("Generation failed: " + data.error, 'error', 'case');
                 } else {
                     currentCases = data.test_cases;
-                    currentModelName = data.model_name || "unknown_model"; // Store model name
+                    currentModelName = data.model_name || "unknown";
                     const timeTaken = data.execution_time || 0;
                     const mins = (timeTaken / 60).toFixed(2);
-                    document.getElementById('execTime').textContent = `(${timeTaken}s | ${mins}m)`;
+
+                    let timeText = `(${timeTaken}s | ${mins}m)`;
+                    if (data.token_usage) {
+                        const total = data.token_usage.total_tokens;
+                        timeText += ` [Tokens: ${total}]`;
+                    }
+                    document.getElementById('execTime').textContent = timeText;
                     renderTable(currentCases);
-                    updateStatus("Test cases generated successfully!", 'success');
+                    updateStatus("Test cases generated successfully!", 'success', 'case');
                 }
             } catch (e) {
                 alert("Network error: " + e);
-                updateStatus("Network error occurred.", 'error');
             } finally {
+                stopTimer();
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('generateBtn').disabled = false;
-                document.getElementById('modelSelect').disabled = false; // Enable Dropdown
+                document.getElementById('modelSelect').disabled = false;
             }
+        }
+
+        async function generatePlanCtx() {
+            const model = document.getElementById('modelSelectPlan').value;
+            currentModelName = model;
+            if (!validateInput(model, inputModePlan, 'promptInputPlan', 'fileInputPlan')) return;
+
+            // UI Setup
+            document.getElementById('loadingPlan').classList.remove('hidden');
+            document.getElementById('resultsSectionPlan').classList.add('hidden');
+            document.getElementById('generateBtnPlan').disabled = true;
+            document.getElementById('modelSelectPlan').disabled = true;
+            updateStatus("Architecting Test Plan...", 'info', 'plan');
+
+            startTimer('timerDisplayPlan');
+
+            let formData = prepareFormData(model, inputModePlan, 'promptInputPlan', 'fileInputPlan');
+
+            try {
+                const response = await fetch('/generate_plan', { method: 'POST', body: formData });
+                const data = await response.json();
+
+                if (data.error) {
+                    alert("Error: " + data.error);
+                    updateStatus("Generation failed: " + data.error, 'error', 'plan');
+                } else {
+                    currentPlan = data.test_plan;
+                    const timeTaken = data.execution_time || 0;
+                    const mins = (timeTaken / 60).toFixed(2);
+
+                    let timeText = `(${timeTaken}s | ${mins}m)`;
+                    if (data.token_usage) {
+                        const total = data.token_usage.total_tokens;
+                        timeText += ` [Tokens: ${total}]`;
+                    }
+                    document.getElementById('execTimePlan').textContent = timeText;
+                    renderPlan(currentPlan);
+                    updateStatus("Test Plan generated successfully!", 'success', 'plan');
+                }
+            } catch (e) {
+                alert("Network error: " + e);
+            } finally {
+                stopTimer();
+                document.getElementById('loadingPlan').classList.add('hidden');
+                document.getElementById('generateBtnPlan').disabled = false;
+                document.getElementById('modelSelectPlan').disabled = false;
+            }
+        }
+
+        function validateInput(model, mode, textId, fileId) {
+            if (mode === 'manual') {
+                const prompt = document.getElementById(textId).value;
+                if (!prompt) { alert("Please enter requirements."); return false; }
+            } else {
+                const fileInput = document.getElementById(fileId);
+                if (!fileInput.files || !fileInput.files[0]) { alert("Please upload a file."); return false; }
+            }
+            if (!model || model.startsWith("No models") || model.startsWith("Connection")) {
+                alert("Please select a valid model."); return false;
+            }
+            return true;
+        }
+
+        function prepareFormData(model, mode, textId, fileId) {
+            let formData = new FormData();
+            formData.append('model', model);
+            formData.append('base_url', baseUrl);
+
+            if (mode === 'manual') {
+                formData.append('prompt', document.getElementById(textId).value);
+            } else {
+                const fileInput = document.getElementById(fileId);
+                formData.append('file', fileInput.files[0]);
+                formData.append('prompt', "Generate based on this document.");
+            }
+            return formData;
+        }
+
+        function renderPlan(plan) {
+            const container = document.getElementById('planContent');
+            container.innerHTML = '';
+
+            if (!plan || !plan.sections) {
+                container.innerHTML = '<p>Error: Invalid plan format received.</p>';
+                return;
+            }
+
+            // Title
+            const title = document.createElement('h1');
+            title.textContent = plan.plan_title || "Master Test Plan";
+            title.style.color = '#60a5fa';
+            title.style.marginBottom = '20px';
+            title.style.borderBottom = '1px solid #334155';
+            title.style.paddingBottom = '10px';
+            container.appendChild(title);
+
+            // Sections
+            plan.sections.forEach(section => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'plan-section';
+                sectionDiv.style.marginBottom = '25px';
+
+                const h3 = document.createElement('h3');
+                h3.textContent = section.heading;
+                h3.style.color = '#e2e8f0';
+                h3.style.marginBottom = '10px';
+
+                const content = document.createElement('div');
+                // Handle potential markdown or newlines
+                content.innerHTML = section.content.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                content.style.lineHeight = '1.6';
+                content.style.color = '#94a3b8';
+
+                sectionDiv.appendChild(h3);
+                sectionDiv.appendChild(content);
+                container.appendChild(sectionDiv);
+            });
+
+            document.getElementById('resultsSectionPlan').classList.remove('hidden');
         }
 
         function renderTable(cases) {
@@ -289,6 +559,8 @@
                 const steps = c.Steps || c.steps || '-';
                 const exp = c.Expected_Result || c.expected_result || '-';
 
+                // Removed broken isLongStep logic
+
                 row.innerHTML = `
                     <td style="font-weight: bold; color: #60a5fa;">${tid}</td>
                     <td><span style="background:rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">${type}</span></td>
@@ -300,6 +572,7 @@
                 tbody.appendChild(row);
             });
 
+            // Unhide results
             document.getElementById('resultsSection').classList.remove('hidden');
         }
 
@@ -328,6 +601,68 @@
                 a.remove();
             } else {
                 alert("Failed to create download.");
+            }
+        }
+
+        async function downloadDoc() {
+            if (!currentPlan) return;
+
+            const response = await fetch('/download_plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ test_plan: currentPlan })
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+
+                // Clean filename chars
+                const safeModelName = currentModelName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                a.download = `LLM_TestPlan_${safeModelName}.docx`;
+
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } else {
+                alert("Failed to create document download.");
+            }
+        }
+
+        async function downloadPdf() {
+            if (!currentPlan) return;
+
+            const response = await fetch('/download_plan_pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ test_plan: currentPlan })
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+
+                // Clean filename chars
+                const safeModelName = currentModelName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                a.download = `LLM_TestPlan_${safeModelName}.pdf`;
+
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } else {
+                alert("Failed to create PDF download.");
+            }
+        }
+        function handlePlanDownload() {
+            const format = document.getElementById('downloadFormatSelect').value;
+            if (format === 'pdf') {
+                downloadPdf();
+            } else {
+                downloadDoc();
             }
         }
     </script>

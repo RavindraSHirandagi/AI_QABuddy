@@ -4,25 +4,25 @@ import os
 # Add tools directory to path so we can import modules
 sys.path.append(os.path.join(os.path.dirname(__file__), 'tools'))
 
-from generate_test_cases import generate_cases_from_lm_studio
-from handshake import check_lm_studio
+from generate_test_cases import generate_cases_from_server
+from handshake import check_ai_server
 from save_to_excel import save_cases_to_excel
 
 def main():
-    print("[*] Local LLM Test Case Generator (Powered by LM Studio)")
+    print("[*] Local LLM Test Case Generator (Powered by Ollama/AI Server)")
     print("---------------------------------------------------")
     
     # 0. Select Model
-    print("[.] Checking available models in LM Studio...")
-    models = check_lm_studio()
+    print("[.] Checking available models...")
+    models = check_ai_server()
     if not models:
-        print("[X] No models found or LM Studio is not running (Port 1234). Exiting.")
+        print("[X] No models found or AI Server is not running. Exiting.")
         return
 
     selected_model = models[0] # Default
-    # precise match or substring match for mistral
+    # precise match or substring match for llama
     for m in models:
-        if "mistral" in m.lower():
+        if "llama" in m.lower():
             selected_model = m
             break
             
@@ -51,11 +51,15 @@ def main():
         print("[X] Error: No input provided. Exiting.")
         return
 
-    print(f"\n[.] Processing... sending request to LM Studio ({selected_model})...")
+    print(f"\n[.] Processing... sending request to AI Server ({selected_model})...")
 
     # 2. Generate
-    test_cases = generate_cases_from_lm_studio(user_input, model=selected_model)
+    test_cases = generate_cases_from_server(user_input, model=selected_model)
     
+    if isinstance(test_cases, dict) and "error" in test_cases:
+        print(f"[X] Failed to generate test cases: {test_cases['error']}")
+        return
+
     if not test_cases:
         print("[X] Failed to generate test cases. Please check the logs or try again.")
         return
