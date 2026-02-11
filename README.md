@@ -70,6 +70,40 @@ This is a secure, privacy-first web application that generates **Software Test C
 *   **Port**: The tool defaults to Ollama on `localhost:11434`.
 *   **Models**: The tool automatically detects available models from your Ollama instance.
 
+## Project Structure
+
+```
+AI_QABuddy/
+├── .gitignore
+├── app.py                  # Main Flask application
+├── requirements.txt        # Python dependencies
+├── run_generator.py        # Script to run generators
+├── README.md               # Project documentation
+├── architecture/           # Documentation on internal flows
+│   ├── generation_workflow.md
+│   ├── test_case_flow.md
+│   └── test_plan_flow.md
+├── assets/                 # Images and static assets for documentation
+│   ├── test_case_ui.png
+│   ├── test_plan_ui.png
+│   └── ...
+├── static/                 # Static files for the web app
+│   └── style.css
+├── templates/              # HTML templates
+│   └── index.html
+└── tools/                  # Helper scripts and logic
+    ├── debug_model.py
+    ├── file_parser.py
+    ├── generate_test_cases.py
+    ├── generate_test_plan.py
+    ├── handshake.py
+    ├── llm_config.py
+    ├── save_to_docx.py
+    ├── save_to_excel.py
+    └── save_to_pdf.py
+    
+```
+
 ## Troubleshooting
 
 *   **"Read timed out"**: Generation is taking longer than 33 minutes. Try using a smaller model or reducing the scope.
