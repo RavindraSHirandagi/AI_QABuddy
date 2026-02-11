@@ -1,4 +1,4 @@
-# **Test Buddy** - Local AI Test Case & Plan Generator using Ollama
+# **AI_QABuddy** - Local AI Test Case & Plan Generator using Ollama
 
 ## Overview
 This is a secure, privacy-first web application that generates **Software Test Cases** and **Test Plans** using local Large Language Models (LLMs) via **Ollama**. It ensures that your sensitive Requirement Documents (PRDs) and data never leave your local machine.
@@ -18,8 +18,8 @@ This is a secure, privacy-first web application that generates **Software Test C
 
 1.  Clone this repository:
     ```bash
-    git clone <repo_url>
-    cd AITestGenerator
+    git clone https://github.com/RavindraSHirandagi/AI_QABuddy.git
+    cd AI_QABuddy
     ```
 
 2.  Install dependencies:
